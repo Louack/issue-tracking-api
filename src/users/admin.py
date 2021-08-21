@@ -6,7 +6,7 @@ from .models import CustomUser
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    ordering = ('email',)
+    ordering = ('id',)
     list_display = (
         'id',
         'email',

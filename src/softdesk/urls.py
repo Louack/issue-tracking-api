@@ -16,7 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from its_api.urls import router_projects, router_contributors
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('users.urls')),
+    path('api/its/', include(router_projects.urls)),
+    path('api/its/projects/<int:project_id>/', include(router_contributors.urls))
 ]
