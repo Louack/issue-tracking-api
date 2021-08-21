@@ -8,6 +8,7 @@ from .models import CustomUser
 class CustomUserAdmin(UserAdmin):
     ordering = ('email',)
     list_display = (
+        'id',
         'email',
         'last_name',
         'first_name',
@@ -16,7 +17,7 @@ class CustomUserAdmin(UserAdmin):
         'is_admin',
     )
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
+        (None, {'fields': ('email', 'last_name', 'first_name', 'password')}),
         (_('Permissions'), {
             'fields': ('is_active', 'is_staff', 'is_superuser'),
         }),
