@@ -7,5 +7,5 @@ from rest_framework import generics
 
 class SignUpView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
-    permission_classes = [AllowAny]
     serializer_class = SignUpSerializer
+    permission_classes = [AllowAny]
