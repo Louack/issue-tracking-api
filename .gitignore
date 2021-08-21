@@ -1,3 +1,6 @@
 __pycache__/
 venvp10/
 .idea/
+migrations/
+db.sqlite3
+media/
