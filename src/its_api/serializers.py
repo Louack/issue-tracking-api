@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, Contributor
+from .models import Project, Contributor, Issue, Comment
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -22,4 +22,27 @@ class ContributorSerializer(serializers.ModelSerializer):
 
     def get_contributor_id(self, contributor):
         return contributor.pk
+
+
+class IssueSerializer(serializers.ModelSerializer):
+    issue_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Issue
+        fields = ('issue_id', 'description', 'tag', 'priority', 'project_id',
+                  'status', 'author_user_id', 'assignee_user_id', 'created')
+
+    def get_issue_id(self, issue):
+        return issue.pk
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    comment_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = ('comment_id', 'issue_id', 'author_user_id', 'description', 'created')
+
+    def get_comment_id(self, comment):
+        return comment.pk
 
