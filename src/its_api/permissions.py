@@ -1,3 +1,4 @@
+from rest_framework.exceptions import APIException
 from rest_framework.permissions import BasePermission
 
 
@@ -22,3 +23,7 @@ class AuthorAccess(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return request.user == obj.author_user_id
+
+
+class ObjectNotFound(APIException):
+    status_code = 404

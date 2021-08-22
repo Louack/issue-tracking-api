@@ -1,11 +1,10 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
-from rest_framework.exceptions import APIException
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Project, Contributor, Issue, Comment
 from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
-from .permissions import ProjectAcess, DenyProjectAcess, AuthorAccess
+from .permissions import ProjectAcess, DenyProjectAcess, AuthorAccess, ObjectNotFound
 
 
 class ProjectViewset(viewsets.ModelViewSet):
@@ -27,7 +26,7 @@ class ContributorViewset(viewsets.ModelViewSet):
         try:
             project = Project.objects.get(pk=project_id)
         except ObjectDoesNotExist:
-            raise APIException(f"Aucun projet ne correspond à l'identifiant n°{project_id}")
+            raise ObjectNotFound(f"Aucun projet ne correspond à l'identifiant n°{project_id}")
         return project
 
     def get_permissions(self):
@@ -57,7 +56,7 @@ class IssueViewset(viewsets.ModelViewSet):
         try:
             project = Project.objects.get(pk=project_id)
         except ObjectDoesNotExist:
-            raise APIException(f"Aucun projet ne correspond à l'identifiant n°{project_id}")
+            raise ObjectNotFound(f"Aucun projet ne correspond à l'identifiant n°{project_id}")
         return project
 
     def get_permissions(self):
@@ -91,12 +90,12 @@ class CommentViewset(viewsets.ModelViewSet):
         try:
             self.project = Project.objects.get(pk=project_id)
         except ObjectDoesNotExist:
-            raise APIException(f"Aucun projet ne correspond à l'identifiant n°{project_id}")
+            raise ObjectNotFound(f"Aucun projet ne correspond à l'identifiant n°{project_id}")
         issue_id = self.kwargs['issue_id']
         try:
             issue = Issue.objects.get(pk=issue_id)
         except ObjectDoesNotExist:
-            raise APIException(f"Aucun problème ne correspond à l'identifiant n°{issue_id}")
+            raise ObjectNotFound(f"Aucun problème ne correspond à l'identifiant n°{issue_id}")
         return issue
 
     def get_permissions(self):
