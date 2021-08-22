@@ -42,7 +42,9 @@ class Contributor(models.Model):
     project_id = models.ForeignKey(
         verbose_name='Projet',
         to=Project,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
     )
 
     role = models.CharField(
@@ -84,7 +86,9 @@ class Issue(models.Model):
     project_id = models.ForeignKey(
         verbose_name='Projet',
         to=Project,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
     )
 
     created = models.DateTimeField(
@@ -96,7 +100,9 @@ class Issue(models.Model):
         verbose_name='Auteur',
         to=settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
-        related_name='Auteur'
+        related_name='Auteur',
+        blank=True,
+        null=True
     )
 
     assignee_user_id = models.ForeignKey(
@@ -111,11 +117,6 @@ class Issue(models.Model):
     class Meta:
         verbose_name = 'Problème'
 
-    def save(self, *args, **kwargs):
-        if not self.assignee_user_id:
-            self.assignee_user_id = self.author_user_id
-        super().save(*args, **kwargs)
-
 
 class Comment(models.Model):
     description = models.CharField(
@@ -126,13 +127,17 @@ class Comment(models.Model):
     author_user_id = models.ForeignKey(
         verbose_name='Auteur',
         to=settings.AUTH_USER_MODEL,
-        on_delete=models.PROTECT
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True
     )
 
     issue_id = models.ForeignKey(
         verbose_name='Problème',
         to=Issue,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
     )
 
     created = models.DateTimeField(

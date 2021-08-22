@@ -12,6 +12,11 @@ class ProjectViewset(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated, ProjectAcess]
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request_user'] = self.request.user
+        return context
+
 
 class ContributorViewset(viewsets.ModelViewSet):
     serializer_class = ContributorSerializer
@@ -39,7 +44,7 @@ class ContributorViewset(viewsets.ModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['kwargs'] = self.kwargs
+        context['project'] = self.project
         return context
 
 
@@ -72,7 +77,8 @@ class IssueViewset(viewsets.ModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['kwargs'] = self.kwargs
+        context['request_user'] = self.request.user
+        context['project'] = self.project
         return context
 
 
@@ -111,5 +117,7 @@ class CommentViewset(viewsets.ModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['kwargs'] = self.kwargs
+        context['request_user'] = self.request.user
+        context['project'] = self.project
+        context['issue'] = self.issue
         return context
