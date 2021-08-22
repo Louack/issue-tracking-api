@@ -22,6 +22,10 @@ class ContributorViewset(viewsets.ModelViewSet):
     serializer_class = ContributorSerializer
     project = None
 
+    def dispatch(self, request, *args, **kwargs):
+        self.project = self.get_project()
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         queryset = Contributor.objects.filter(project_id=self.project.pk)
         return queryset
@@ -35,9 +39,8 @@ class ContributorViewset(viewsets.ModelViewSet):
         return project
 
     def get_permissions(self):
-        self.project = self.get_project()
         contributors = self.project.contributor_set.all()
-        users = [contributor.user_id for contributor in contributors]
+        users = [contributor.user for contributor in contributors]
         if self.request.user not in users:
             self.permission_classes = [DenyProjectAcess]
         return [permission() for permission in self.permission_classes]
@@ -52,6 +55,10 @@ class IssueViewset(viewsets.ModelViewSet):
     serializer_class = IssueSerializer
     project = None
 
+    def dispatch(self, request, *args, **kwargs):
+        self.project = self.get_project()
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         queryset = Issue.objects.filter(project_id=self.project.pk)
         return queryset
@@ -65,9 +72,8 @@ class IssueViewset(viewsets.ModelViewSet):
         return project
 
     def get_permissions(self):
-        self.project = self.get_project()
         contributors = self.project.contributor_set.all()
-        users = [contributor.user_id for contributor in contributors]
+        users = [contributor.user for contributor in contributors]
         if self.request.user not in users:
             self.permission_classes = [DenyProjectAcess]
         else:
@@ -87,6 +93,10 @@ class CommentViewset(viewsets.ModelViewSet):
     project = None
     issue = None
 
+    def dispatch(self, request, *args, **kwargs):
+        self.issue = self.get_issue()
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         queryset = Comment.objects.filter(issue_id=self.issue.pk)
         return queryset
@@ -105,9 +115,8 @@ class CommentViewset(viewsets.ModelViewSet):
         return issue
 
     def get_permissions(self):
-        self.issue = self.get_issue()
         contributors = self.project.contributor_set.all()
-        users = [contributor.user_id for contributor in contributors]
+        users = [contributor.user for contributor in contributors]
         if self.request.user not in users:
             self.permission_classes = [DenyProjectAcess]
         else:

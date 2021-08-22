@@ -7,7 +7,7 @@ class ProjectAcess(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         contributors = obj.contributor_set.all()
-        users = [contributor.user_id for contributor in contributors]
+        users = [contributor.user for contributor in contributors]
         return request.user in users
 
 
@@ -22,7 +22,7 @@ class AuthorAccess(BasePermission):
     message = "Vous n'êtes pas le créateur de ce problème/commentaire."
 
     def has_object_permission(self, request, view, obj):
-        return request.user == obj.author_user_id
+        return request.user == obj.author
 
 
 class ObjectNotFound(APIException):

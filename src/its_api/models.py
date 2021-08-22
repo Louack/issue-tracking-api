@@ -19,10 +19,12 @@ class Project(models.Model):
         max_length=64
     )
 
-    author_user_id = models.ForeignKey(
+    author = models.ForeignKey(
         verbose_name='Auteur',
         to=settings.AUTH_USER_MODEL,
-        on_delete=models.PROTECT
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True
     )
 
     class Meta:
@@ -33,13 +35,13 @@ class Project(models.Model):
 
 
 class Contributor(models.Model):
-    user_id = models.ForeignKey(
+    user = models.ForeignKey(
         verbose_name='Utilisateur',
         to=settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT
     )
 
-    project_id = models.ForeignKey(
+    project = models.ForeignKey(
         verbose_name='Projet',
         to=Project,
         on_delete=models.CASCADE,
@@ -83,7 +85,7 @@ class Issue(models.Model):
         max_length=64
     )
 
-    project_id = models.ForeignKey(
+    project = models.ForeignKey(
         verbose_name='Projet',
         to=Project,
         on_delete=models.CASCADE,
@@ -96,7 +98,7 @@ class Issue(models.Model):
         auto_now_add=True
     )
 
-    author_user_id = models.ForeignKey(
+    author = models.ForeignKey(
         verbose_name='Auteur',
         to=settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -105,7 +107,7 @@ class Issue(models.Model):
         null=True
     )
 
-    assignee_user_id = models.ForeignKey(
+    assignee = models.ForeignKey(
         verbose_name='Assigné',
         to=settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -124,7 +126,7 @@ class Comment(models.Model):
         max_length=2056
     )
 
-    author_user_id = models.ForeignKey(
+    author = models.ForeignKey(
         verbose_name='Auteur',
         to=settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -132,7 +134,7 @@ class Comment(models.Model):
         null=True
     )
 
-    issue_id = models.ForeignKey(
+    issue = models.ForeignKey(
         verbose_name='Problème',
         to=Issue,
         on_delete=models.CASCADE,

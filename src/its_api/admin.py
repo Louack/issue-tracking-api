@@ -7,7 +7,7 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'title',
-        'author_user_id',
+        'author',
         'type',
     )
 
@@ -15,8 +15,8 @@ class ProjectAdmin(admin.ModelAdmin):
 @admin.register(Contributor)
 class ContributorAdmin(admin.ModelAdmin):
     list_display = (
-        'project_id',
-        'user_id',
+        'project',
+        'user',
         'role',
     )
 
@@ -28,17 +28,17 @@ class IssueAdmin(admin.ModelAdmin):
         'description',
         'tag',
         'priority',
-        'project_id',
+        'project',
         'status',
-        'author_user_id',
-        'assignee_user_id',
+        'author',
+        'assignee',
     )
 
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = (
-        'issue_id',
+        'issue',
         'description',
-        'author_user_id',
+        'author',
     )
