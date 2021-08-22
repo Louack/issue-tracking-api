@@ -1,6 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
 from rest_framework.exceptions import APIException
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Project, Contributor, Issue, Comment
 from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
@@ -10,7 +11,7 @@ from .permissions import ProjectAcess, DenyProjectAcess, AuthorAccess
 class ProjectViewset(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [ProjectAcess]
+    permission_classes = [IsAuthenticated, ProjectAcess]
 
 
 class ContributorViewset(viewsets.ModelViewSet):
@@ -20,16 +21,6 @@ class ContributorViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Contributor.objects.filter(project_id=self.project.pk)
         return queryset
-
-    def create(self, request, *args, **kwargs):
-        if request.data['project_id'] != str(self.project.pk):
-            raise APIException("Ce n'est pas le bon projet")
-        return super().create(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        if request.data['project_id'] != str(self.project.pk):
-            raise APIException("Ce n'est pas le bon projet")
-        return super().update(request, *args, **kwargs)
 
     def get_project(self):
         project_id = self.kwargs['project_id']
@@ -47,6 +38,11 @@ class ContributorViewset(viewsets.ModelViewSet):
             self.permission_classes = [DenyProjectAcess]
         return [permission() for permission in self.permission_classes]
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['kwargs'] = self.kwargs
+        return context
+
 
 class IssueViewset(viewsets.ModelViewSet):
     serializer_class = IssueSerializer
@@ -55,16 +51,6 @@ class IssueViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Issue.objects.filter(project_id=self.project.pk)
         return queryset
-
-    def create(self, request, *args, **kwargs):
-        if request.data['project_id'] != str(self.project.pk):
-            raise APIException("Ce n'est pas le bon projet")
-        return super().create(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        if request.data['project_id'] != str(self.project.pk):
-            raise APIException("Ce n'est pas le bon projet")
-        return super().update(request, *args, **kwargs)
 
     def get_project(self):
         project_id = self.kwargs['project_id']
@@ -85,6 +71,11 @@ class IssueViewset(viewsets.ModelViewSet):
                 self.permission_classes = [AuthorAccess]
         return [permission() for permission in self.permission_classes]
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['kwargs'] = self.kwargs
+        return context
+
 
 class CommentViewset(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -94,16 +85,6 @@ class CommentViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Comment.objects.filter(issue_id=self.issue.pk)
         return queryset
-
-    def create(self, request, *args, **kwargs):
-        if request.data['issue_id'] != str(self.issue.pk):
-            raise APIException("Ce n'est pas le bon problème")
-        return super().create(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        if request.data['issue_id'] != str(self.issue.pk):
-            raise APIException("Ce n'est pas le bon problème")
-        return super().update(request, *args, **kwargs)
 
     def get_issue(self):
         project_id = self.kwargs['project_id']
@@ -128,3 +109,8 @@ class CommentViewset(viewsets.ModelViewSet):
             if not self.action == 'retrieve':
                 self.permission_classes = [AuthorAccess]
         return [permission() for permission in self.permission_classes]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['kwargs'] = self.kwargs
+        return context

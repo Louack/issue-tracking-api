@@ -23,6 +23,12 @@ class ContributorSerializer(serializers.ModelSerializer):
     def get_contributor_id(self, contributor):
         return contributor.pk
 
+    def validate_project_id(self, project):
+        if project.pk == self.context['kwargs']['project_id']:
+            return project
+        else:
+            raise serializers.ValidationError("Ce n'est pas le bon projet.")
+
 
 class IssueSerializer(serializers.ModelSerializer):
     issue_id = serializers.SerializerMethodField()
@@ -35,6 +41,12 @@ class IssueSerializer(serializers.ModelSerializer):
     def get_issue_id(self, issue):
         return issue.pk
 
+    def validate_project_id(self, project):
+        if project.pk == self.context['kwargs']['project_id']:
+            return project
+        else:
+            raise serializers.ValidationError("Ce n'est pas le bon projet.")
+
 
 class CommentSerializer(serializers.ModelSerializer):
     comment_id = serializers.SerializerMethodField()
@@ -45,4 +57,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def get_comment_id(self, comment):
         return comment.pk
+
+    def validate_issue_id(self, issue):
+        if issue.pk == self.context['kwargs']['issue_id']:
+            return issue
+        else:
+            raise serializers.ValidationError("Ce n'est pas le bon problème.")
 
