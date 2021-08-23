@@ -1,16 +1,16 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
 
 from .models import Project, Contributor, Issue, Comment
 from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
-from .permissions import ProjectAcess, DenyProjectAcess, AuthorAccess, ObjectNotFound
+from .permissions import ProjectAcess, AuthorAccess, ProjectOwnerAccess
+from .exceptions import ObjectNotFound, BadRequest
 
 
 class ProjectViewset(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated, ProjectAcess]
+    permission_classes = [ProjectAcess, AuthorAccess]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -20,11 +20,12 @@ class ProjectViewset(viewsets.ModelViewSet):
 
 class ContributorViewset(viewsets.ModelViewSet):
     serializer_class = ContributorSerializer
+    permission_classes = [ProjectAcess, ProjectOwnerAccess]
     project = None
 
-    def dispatch(self, request, *args, **kwargs):
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
         self.project = self.get_project()
-        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = Contributor.objects.filter(project_id=self.project.pk)
@@ -38,26 +39,25 @@ class ContributorViewset(viewsets.ModelViewSet):
             raise ObjectNotFound(f"Aucun projet ne correspond à l'identifiant n°{project_id}")
         return project
 
-    def get_permissions(self):
-        contributors = self.project.contributor_set.all()
-        users = [contributor.user for contributor in contributors]
-        if self.request.user not in users:
-            self.permission_classes = [DenyProjectAcess]
-        return [permission() for permission in self.permission_classes]
-
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['project'] = self.project
         return context
 
+    def perform_destroy(self, instance):
+        if instance.user == self.project.author:
+            raise BadRequest('En tant que créateur du projet, vous ne pouvez pas vous supprimer des collaborateurs.')
+        return super().perform_destroy(instance)
+
 
 class IssueViewset(viewsets.ModelViewSet):
     serializer_class = IssueSerializer
+    permission_classes = [ProjectAcess, AuthorAccess]
     project = None
 
-    def dispatch(self, request, *args, **kwargs):
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
         self.project = self.get_project()
-        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = Issue.objects.filter(project_id=self.project.pk)
@@ -71,16 +71,6 @@ class IssueViewset(viewsets.ModelViewSet):
             raise ObjectNotFound(f"Aucun projet ne correspond à l'identifiant n°{project_id}")
         return project
 
-    def get_permissions(self):
-        contributors = self.project.contributor_set.all()
-        users = [contributor.user for contributor in contributors]
-        if self.request.user not in users:
-            self.permission_classes = [DenyProjectAcess]
-        else:
-            if not self.action == 'retrieve':
-                self.permission_classes = [AuthorAccess]
-        return [permission() for permission in self.permission_classes]
-
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['request_user'] = self.request.user
@@ -90,12 +80,12 @@ class IssueViewset(viewsets.ModelViewSet):
 
 class CommentViewset(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    project = None
+    permission_classes = [ProjectAcess, AuthorAccess]
     issue = None
 
-    def dispatch(self, request, *args, **kwargs):
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
         self.issue = self.get_issue()
-        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = Comment.objects.filter(issue_id=self.issue.pk)
@@ -104,29 +94,20 @@ class CommentViewset(viewsets.ModelViewSet):
     def get_issue(self):
         project_id = self.kwargs['project_id']
         try:
-            self.project = Project.objects.get(pk=project_id)
+            Project.objects.get(pk=project_id)
         except ObjectDoesNotExist:
-            raise ObjectNotFound(f"Aucun projet ne correspond à l'identifiant n°{project_id}")
+            raise ObjectNotFound(f"Aucun projet ne correspond à l'identifiant n°{project_id}.")
         issue_id = self.kwargs['issue_id']
         try:
-            issue = Issue.objects.get(pk=issue_id)
+            issue = Issue.objects.get(pk=self.kwargs['issue_id'])
         except ObjectDoesNotExist:
-            raise ObjectNotFound(f"Aucun problème ne correspond à l'identifiant n°{issue_id}")
+            raise ObjectNotFound(f"Aucun problème ne correspond à l'identifiant n°{issue_id}.")
+        if not issue.project.pk == project_id:
+            raise ObjectNotFound(f"Le projet n°{project_id} ne comprend pas de problème n°{issue_id}. ")
         return issue
-
-    def get_permissions(self):
-        contributors = self.project.contributor_set.all()
-        users = [contributor.user for contributor in contributors]
-        if self.request.user not in users:
-            self.permission_classes = [DenyProjectAcess]
-        else:
-            if not self.action == 'retrieve':
-                self.permission_classes = [AuthorAccess]
-        return [permission() for permission in self.permission_classes]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['request_user'] = self.request.user
-        context['project'] = self.project
         context['issue'] = self.issue
         return context

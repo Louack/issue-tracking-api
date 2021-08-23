@@ -1,21 +1,23 @@
 from rest_framework import serializers
+from django.db import IntegrityError
+from rest_framework.exceptions import APIException
+
 from .models import Project, Contributor, Issue, Comment
 
 
 class ProjectSerializer(serializers.ModelSerializer):
     project_id = serializers.SerializerMethodField()
-    author = serializers.SerializerMethodField()
+    author_email = serializers.SerializerMethodField()
     author_user_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
-        fields = ('project_id', 'title', 'description', 'type', 'author', 'author_user_id')
-        read_only_fields = ('author',)
+        fields = ('project_id', 'title', 'description', 'type', 'author_email', 'author_user_id')
 
     def get_project_id(self, project):
         return project.pk
 
-    def get_author(self, project):
+    def get_author_email(self, project):
         return project.author.email
 
     def get_author_user_id(self, project):
@@ -33,20 +35,22 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class ContributorSerializer(serializers.ModelSerializer):
     contributor_id = serializers.SerializerMethodField()
-    user = serializers.SerializerMethodField()
+    user_email = serializers.SerializerMethodField()
     user_id = serializers.SerializerMethodField()
     project = serializers.SerializerMethodField()
     project_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Contributor
-        fields = ('contributor_id', 'project', 'project_id', 'user', 'user_id', 'role')
-        read_only_fields = ('project',)
+        fields = ('contributor_id', 'project', 'project_id', 'user', 'user_email', 'user_id', 'role')
+        extra_kwargs = {
+            'user': {'write_only': True}
+        }
 
     def get_contributor_id(self, contributor):
         return contributor.pk
 
-    def get_user(self, contributor):
+    def get_user_email(self, contributor):
         return contributor.user.email
 
     def get_user_id(self, contributor):
@@ -57,6 +61,14 @@ class ContributorSerializer(serializers.ModelSerializer):
 
     def get_project_id(self, contributor):
         return contributor.project.pk
+
+    def validate_user(self, user):
+        project = self.context['project']
+        if self.instance.user == project.author:
+            if self.instance.user != user:
+                raise serializers.ValidationError('En tant que créateur du projet, vous ne '
+                                                  'pouvez pas vous supprimer des collaborateurs.')
+        return user
 
     def create(self, validated_data):
         contributor = super().create(validated_data)
@@ -70,7 +82,11 @@ class ContributorSerializer(serializers.ModelSerializer):
 
     def populate_read_only_fields(self, contributor):
         contributor.project = self.context['project']
-        contributor.save()
+        try:
+            contributor.save()
+        except IntegrityError:
+            contributor.delete()
+            raise APIException('Cet utilisateur fait déjà partie du projet')
         return contributor
 
 
@@ -78,22 +94,24 @@ class IssueSerializer(serializers.ModelSerializer):
     issue_id = serializers.SerializerMethodField()
     project = serializers.SerializerMethodField()
     project_id = serializers.SerializerMethodField()
-    author = serializers.SerializerMethodField()
+    author_email = serializers.SerializerMethodField()
     author_user_id = serializers.SerializerMethodField()
-    assignee = serializers.SerializerMethodField()
+    assignee_email = serializers.SerializerMethodField()
     assignee_user_id = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
 
     class Meta:
         model = Issue
-        fields = ('issue_id', 'description', 'tag', 'priority', 'status', 'project', 'project_id',
-                  'author', 'author_user_id', 'assignee', 'assignee_user_id', 'created')
-        read_only_fields = ('project', 'author')
+        fields = ('issue_id', 'title', 'description', 'tag', 'priority', 'status', 'project', 'project_id',
+                  'author_email', 'author_user_id', 'assignee', 'assignee_email', 'assignee_user_id', 'created')
+        extra_kwargs = {
+            'assignee': {'write_only': True}
+        }
 
     def get_issue_id(self, issue):
         return issue.pk
 
-    def get_author(self, issue):
+    def get_author_email(self, issue):
         return issue.author.email
 
     def get_author_user_id(self, issue):
@@ -105,7 +123,7 @@ class IssueSerializer(serializers.ModelSerializer):
     def get_project_id(self, issue):
         return issue.project.pk
 
-    def get_assignee(self, issue):
+    def get_assignee_email(self, issue):
         return issue.assignee.email
 
     def get_assignee_user_id(self, issue):
@@ -135,26 +153,29 @@ class IssueSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     comment_id = serializers.SerializerMethodField()
+    issue = serializers.SerializerMethodField()
     issue_id = serializers.SerializerMethodField()
     project = serializers.SerializerMethodField()
     project_id = serializers.SerializerMethodField()
-    author = serializers.SerializerMethodField()
+    author_email = serializers.SerializerMethodField()
     author_user_id = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ('comment_id', 'description', 'issue_id', 'project',
-                  'project_id', 'author', 'author_user_id', 'created')
-        read_only_fields = ('issue', 'author')
+        fields = ('comment_id', 'description', 'issue', 'issue_id', 'project',
+                  'project_id', 'author_email', 'author_user_id', 'created')
 
     def get_comment_id(self, comment):
         return comment.pk
 
+    def get_issue(self, comment):
+        return comment.issue.title
+
     def get_issue_id(self, comment):
         return comment.issue.pk
 
-    def get_author(self, comment):
+    def get_author_email(self, comment):
         return comment.author.email
 
     def get_author_user_id(self, comment):
@@ -184,4 +205,3 @@ class CommentSerializer(serializers.ModelSerializer):
         comment.issue = self.context['issue']
         comment.save()
         return comment
-
