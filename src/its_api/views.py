@@ -3,24 +3,39 @@ from rest_framework import viewsets
 
 from .models import Project, Contributor, Issue, Comment
 from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
-from .permissions import ProjectAcess, AuthorAccess, ProjectOwnerAccess
+from .permissions import AuthorAccess, ProjectOwnerAccess
 from .exceptions import ObjectNotFound, BadRequest
 
 
 class ProjectViewset(viewsets.ModelViewSet):
-    queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [ProjectAcess, AuthorAccess]
+    permission_classes = [AuthorAccess]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['request_user'] = self.request.user
         return context
 
+    def get_queryset(self):
+        contributors = Contributor.objects.filter(user=self.request.user)
+        queryset = [contributor.project for contributor in contributors]
+        return queryset
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        target_proj = None
+        for project in queryset:
+            if int(self.kwargs['pk']) == project.pk:
+                target_proj = project
+        if target_proj:
+            return target_proj
+        else:
+            raise ObjectNotFound('Not found')
+
 
 class ContributorViewset(viewsets.ModelViewSet):
     serializer_class = ContributorSerializer
-    permission_classes = [ProjectAcess, ProjectOwnerAccess]
+    permission_classes = [ProjectOwnerAccess]
     project = None
 
     def initial(self, request, *args, **kwargs):
@@ -36,7 +51,10 @@ class ContributorViewset(viewsets.ModelViewSet):
         try:
             project = Project.objects.get(pk=project_id)
         except ObjectDoesNotExist:
-            raise ObjectNotFound(f"Aucun projet ne correspond à l'identifiant n°{project_id}")
+            raise ObjectNotFound('Not found')
+        contributors = [contributor.user for contributor in project.contributor_set.all()]
+        if self.request.user not in contributors:
+            raise ObjectNotFound('Not found')
         return project
 
     def get_serializer_context(self):
@@ -52,7 +70,7 @@ class ContributorViewset(viewsets.ModelViewSet):
 
 class IssueViewset(viewsets.ModelViewSet):
     serializer_class = IssueSerializer
-    permission_classes = [ProjectAcess, AuthorAccess]
+    permission_classes = [AuthorAccess]
     project = None
 
     def initial(self, request, *args, **kwargs):
@@ -68,7 +86,10 @@ class IssueViewset(viewsets.ModelViewSet):
         try:
             project = Project.objects.get(pk=project_id)
         except ObjectDoesNotExist:
-            raise ObjectNotFound(f"Aucun projet ne correspond à l'identifiant n°{project_id}")
+            raise ObjectNotFound('Not found')
+        contributors = [contributor.user for contributor in project.contributor_set.all()]
+        if self.request.user not in contributors:
+            raise ObjectNotFound('Not found')
         return project
 
     def get_serializer_context(self):
@@ -80,30 +101,39 @@ class IssueViewset(viewsets.ModelViewSet):
 
 class CommentViewset(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [ProjectAcess, AuthorAccess]
+    permission_classes = [AuthorAccess]
+    project = None
     issue = None
 
     def initial(self, request, *args, **kwargs):
         super().initial(request, *args, **kwargs)
+        self.project = self.get_project()
         self.issue = self.get_issue()
 
     def get_queryset(self):
         queryset = Comment.objects.filter(issue_id=self.issue.pk)
         return queryset
 
-    def get_issue(self):
+    def get_project(self):
         project_id = self.kwargs['project_id']
         try:
-            Project.objects.get(pk=project_id)
+            project = Project.objects.get(pk=project_id)
         except ObjectDoesNotExist:
-            raise ObjectNotFound(f"Aucun projet ne correspond à l'identifiant n°{project_id}.")
+            raise ObjectNotFound('Not found')
+        contributors = [contributor.user for contributor in project.contributor_set.all()]
+        if self.request.user not in contributors:
+            raise ObjectNotFound('Not found')
+        return project
+
+    def get_issue(self):
         issue_id = self.kwargs['issue_id']
         try:
-            issue = Issue.objects.get(pk=self.kwargs['issue_id'])
+            issue = Issue.objects.get(pk=issue_id)
         except ObjectDoesNotExist:
-            raise ObjectNotFound(f"Aucun problème ne correspond à l'identifiant n°{issue_id}.")
-        if not issue.project.pk == project_id:
-            raise ObjectNotFound(f"Le projet n°{project_id} ne comprend pas de problème n°{issue_id}. ")
+            raise ObjectNotFound('Not found')
+        project_id = self.kwargs['project_id']
+        if issue.project.pk != project_id:
+            raise ObjectNotFound('Not found')
         return issue
 
     def get_serializer_context(self):
