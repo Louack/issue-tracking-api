@@ -39,8 +39,8 @@ class ContributorViewset(viewsets.ModelViewSet):
     project = None
 
     def initial(self, request, *args, **kwargs):
-        super().initial(request, *args, **kwargs)
         self.project = self.get_project()
+        super().initial(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = Contributor.objects.filter(project_id=self.project.pk)
@@ -74,8 +74,8 @@ class IssueViewset(viewsets.ModelViewSet):
     project = None
 
     def initial(self, request, *args, **kwargs):
-        super().initial(request, *args, **kwargs)
         self.project = self.get_project()
+        super().initial(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = Issue.objects.filter(project_id=self.project.pk)
@@ -106,9 +106,9 @@ class CommentViewset(viewsets.ModelViewSet):
     issue = None
 
     def initial(self, request, *args, **kwargs):
-        super().initial(request, *args, **kwargs)
         self.project = self.get_project()
         self.issue = self.get_issue()
+        super().initial(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = Comment.objects.filter(issue_id=self.issue.pk)

@@ -11,17 +11,10 @@ class SignUpSerializer(serializers.ModelSerializer):
     )
 
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-    password2 = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = CustomUser
-        fields = ('email', 'password', 'password2', 'first_name', 'last_name')
-
-    def validate(self, attrs):
-        if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"Mot de passe": "Les mots de passe ne correspondent pas."})
-
-        return attrs
+        fields = ('email', 'password', 'first_name', 'last_name')
 
     def create(self, validated_data):
         user = CustomUser.objects.create(
