@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Project, Contributor, Issue, Comment
 from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
@@ -9,7 +10,7 @@ from .exceptions import ObjectNotFound, BadRequest
 
 class ProjectViewset(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
-    permission_classes = [AuthorAccess]
+    permission_classes = [IsAuthenticated, AuthorAccess]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -35,11 +36,12 @@ class ProjectViewset(viewsets.ModelViewSet):
 
 class ContributorViewset(viewsets.ModelViewSet):
     serializer_class = ContributorSerializer
-    permission_classes = [ProjectOwnerAccess]
+    permission_classes = [IsAuthenticated, ProjectOwnerAccess]
     project = None
 
     def initial(self, request, *args, **kwargs):
-        self.project = self.get_project()
+        if self.request.user.is_authenticated:
+            self.project = self.get_project()
         super().initial(request, *args, **kwargs)
 
     def get_queryset(self):
@@ -70,11 +72,12 @@ class ContributorViewset(viewsets.ModelViewSet):
 
 class IssueViewset(viewsets.ModelViewSet):
     serializer_class = IssueSerializer
-    permission_classes = [AuthorAccess]
+    permission_classes = [IsAuthenticated, AuthorAccess]
     project = None
 
     def initial(self, request, *args, **kwargs):
-        self.project = self.get_project()
+        if self.request.user.is_authenticated:
+            self.project = self.get_project()
         super().initial(request, *args, **kwargs)
 
     def get_queryset(self):
@@ -101,13 +104,14 @@ class IssueViewset(viewsets.ModelViewSet):
 
 class CommentViewset(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [AuthorAccess]
+    permission_classes = [IsAuthenticated, AuthorAccess]
     project = None
     issue = None
 
     def initial(self, request, *args, **kwargs):
-        self.project = self.get_project()
-        self.issue = self.get_issue()
+        if self.request.user.is_authenticated:
+            self.project = self.get_project()
+            self.issue = self.get_issue()
         super().initial(request, *args, **kwargs)
 
     def get_queryset(self):

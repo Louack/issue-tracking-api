@@ -22,10 +22,9 @@ from .views import index
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name='index'),
-    path('api/', index, name='index'),
-    path('api/auth/', include('users.urls')),
-    path('api/its/', include(router_projects.urls), name='api-root'),
-    path('api/its/projects/<int:project_id>/', include(router_contributors.urls)),
-    path('api/its/projects/<int:project_id>/', include(router_issues.urls)),
-    path('api/its/projects/<int:project_id>/issues/<int:issue_id>/', include(router_comments.urls))
+    path('api/', include('users.urls')),
+    path('api/projects/', include(router_projects.urls), name='api-root'),
+    path('api/projects/<int:project_id>/', include(router_contributors.urls)),
+    path('api/projects/<int:project_id>/', include(router_issues.urls)),
+    path('api/projects/<int:project_id>/issues/<int:issue_id>/', include(router_comments.urls))
 ]

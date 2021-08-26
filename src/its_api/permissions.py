@@ -6,8 +6,7 @@ class ProjectOwnerAccess(BasePermission):
 
     def has_permission(self, request, view):
         if view.action not in ['list', 'retrieve']:
-            project = view.project
-            return request.user == project.author
+            return request.user == view.project.author
         else:
             return True
 

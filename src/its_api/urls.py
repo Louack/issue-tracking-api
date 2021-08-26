@@ -2,7 +2,7 @@ from .views import ProjectViewset, ContributorViewset, IssueViewset, CommentView
 from rest_framework.routers import DefaultRouter
 
 router_projects = DefaultRouter()
-router_projects.register(r'projects', ProjectViewset, basename='projects')
+router_projects.register(r'', ProjectViewset, basename='projects')
 
 router_contributors = DefaultRouter()
 router_contributors.register(r'users', ContributorViewset, basename='project-contributors')
