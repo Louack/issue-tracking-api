@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.db import IntegrityError
 from rest_framework.exceptions import APIException
 
 from .models import Project, Contributor, Issue, Comment
@@ -59,35 +58,21 @@ class ContributorSerializer(serializers.ModelSerializer):
                 'email': contributor.user.email}
 
     def validate_user(self, user):
-        if self.instance:
-            project = self.context['project']
-            if self.instance.user == project.author:
-                if self.instance.user != user:
-                    raise serializers.ValidationError('En tant que créateur du projet, vous ne '
-                                                      'pouvez pas vous supprimer des collaborateurs.')
+        if user in self.context['contributors']:
+            raise serializers.ValidationError('Cet Utilisateur fait déjà '
+                                              'partie des collaborateurs.')
         return user
 
     def create(self, validated_data):
         contributor = super().create(validated_data)
-        contributor = self.populate_read_only_fields(contributor)
+        contributor.project = self.context['project']
+        contributor.save()
         return contributor
 
     def update(self, instance, validated_data):
-        try:
-            contributor = super().update(instance, validated_data)
-        except IntegrityError:
-            raise APIException('Cet utilisateur fait déjà partie du projet')
-        contributor = self.populate_read_only_fields(contributor)
-        return contributor
-
-    def populate_read_only_fields(self, contributor):
-        contributor.project = self.context['project']
-        try:
-            contributor.save()
-        except IntegrityError:
-            contributor.delete()
-            raise APIException('Cet utilisateur fait déjà partie du projet')
-        return contributor
+        if 'user' in validated_data.keys():
+            raise APIException("Le champ 'user' n'est pas modifiable.")
+        super().update(instance, validated_data)
 
 
 class IssueSerializer(serializers.ModelSerializer):
@@ -125,15 +110,15 @@ class IssueSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         issue = super().create(validated_data)
-        issue = self.populate_read_only_fields(issue)
+        issue = self.populate_fixed_attributes(issue)
         return issue
 
     def update(self, instance, validated_data):
         issue = super().update(instance, validated_data)
-        issue = self.populate_read_only_fields(issue)
+        issue = self.populate_fixed_attributes(issue)
         return issue
 
-    def populate_read_only_fields(self, issue):
+    def populate_fixed_attributes(self, issue):
         issue.author = self.context['request_user']
         if not issue.assignee:
             issue.assignee = self.context['request_user']
@@ -174,15 +159,15 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         comment = super().create(validated_data)
-        comment = self.populate_read_only_fields(comment)
+        comment = self.populate_fixed_attributes(comment)
         return comment
 
     def update(self, instance, validated_data):
         comment = super().update(instance, validated_data)
-        comment = self.populate_read_only_fields(comment)
+        comment = self.populate_fixed_attributes(comment)
         return comment
 
-    def populate_read_only_fields(self, comment):
+    def populate_fixed_attributes(self, comment):
         comment.author = self.context['request_user']
         comment.issue = self.context['issue']
         comment.save()

@@ -2,6 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
+from users.models import CustomUser
 from .models import Project, Contributor, Issue, Comment
 from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
 from .permissions import AuthorAccess, ProjectOwnerAccess
@@ -18,23 +19,12 @@ class ProjectViewset(viewsets.ModelViewSet):
         return context
 
     def get_queryset(self):
-        contributors = Contributor.objects.filter(user=self.request.user)
-        queryset = [contributor.project for contributor in contributors]
+        queryset = Project.objects.filter(contributor__user=self.request.user.pk)
         return queryset
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        target_proj = None
-        for project in queryset:
-            if int(self.kwargs['pk']) == project.pk:
-                target_proj = project
-        if target_proj:
-            return target_proj
-        else:
-            raise ObjectNotFound('Not found')
 
 
 class ContributorViewset(viewsets.ModelViewSet):
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options', 'trace']
     serializer_class = ContributorSerializer
     permission_classes = [IsAuthenticated, ProjectOwnerAccess]
     project = None
@@ -54,14 +44,15 @@ class ContributorViewset(viewsets.ModelViewSet):
             project = Project.objects.get(pk=project_id)
         except ObjectDoesNotExist:
             raise ObjectNotFound('Not found')
-        contributors = [contributor.user for contributor in project.contributor_set.all()]
-        if self.request.user not in contributors:
+        self.contributors = CustomUser.objects.filter(contributor__project=project.pk)
+        if self.request.user not in self.contributors:
             raise ObjectNotFound('Not found')
         return project
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['project'] = self.project
+        context['contributors'] = self.contributors
         return context
 
     def perform_destroy(self, instance):
@@ -90,7 +81,7 @@ class IssueViewset(viewsets.ModelViewSet):
             project = Project.objects.get(pk=project_id)
         except ObjectDoesNotExist:
             raise ObjectNotFound('Not found')
-        contributors = [contributor.user for contributor in project.contributor_set.all()]
+        contributors = CustomUser.objects.filter(contributor__project=project.pk)
         if self.request.user not in contributors:
             raise ObjectNotFound('Not found')
         return project
@@ -124,7 +115,7 @@ class CommentViewset(viewsets.ModelViewSet):
             project = Project.objects.get(pk=project_id)
         except ObjectDoesNotExist:
             raise ObjectNotFound('Not found')
-        contributors = [contributor.user for contributor in project.contributor_set.all()]
+        contributors = CustomUser.objects.filter(contributor__project=project.pk)
         if self.request.user not in contributors:
             raise ObjectNotFound('Not found')
         return project
