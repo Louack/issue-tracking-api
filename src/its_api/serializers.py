@@ -72,7 +72,7 @@ class ContributorSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if 'user' in validated_data.keys():
             raise APIException("Le champ 'user' n'est pas modifiable.")
-        super().update(instance, validated_data)
+        return super().update(instance, validated_data)
 
 
 class IssueSerializer(serializers.ModelSerializer):

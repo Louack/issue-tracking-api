@@ -17,13 +17,16 @@ L'API permet à des utilisateurs enregistrés de créer des projets pour enregis
 ## UTILISATION ET FONCTIONNALITES
 
 L'API est accessible depuis l'adresse locale 'http://127.0.0.1:8000/'
+
 La documentation Postman des fonctionnalités est disponible à l'adresse : 
-'https://web.postman.co/workspace/My-Workspace~397ac477-adca-4c79-8e68-74edce8cd8e6/documentation/17143964-b737e079-9ddf-4db5-9b6e-560f6d9ab27d'
+* 'https://www.postman.com/louack/workspace/oc-pp10/documentation/17143964-b737e079-9ddf-4db5-9b6e-560f6d9ab27d'
 
 ## BASE DE DONNEES FOURNIE
 
 L'utilisateur 'loic@softdesk.com' dispose des droits d'administration.
+
 Le mot de passe attribué à tous les utilisateurs est : 'api_projet'.
+
 Liste des utilisateurs:
 * loic@softdesk.com
 * roger@softdesk.com
