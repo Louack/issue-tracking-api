@@ -25,7 +25,7 @@ La documentation Postman des fonctionnalités est disponible à l'adresse :
 
 L'utilisateur 'loic@softdesk.com' dispose des droits d'administration.
 
-Le mot de passe attribué à tous les utilisateurs est : 'api_projet'.
+Le mot de passe attribué à tous les utilisateurs est : 'api_project'.
 
 Liste des utilisateurs:
 * loic@softdesk.com
