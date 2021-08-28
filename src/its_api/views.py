@@ -57,7 +57,8 @@ class ContributorViewset(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         if instance.user == self.project.author:
-            raise BadRequest('En tant que créateur du projet, vous ne pouvez pas vous supprimer des collaborateurs.')
+            raise BadRequest('En tant que créateur du projet, vous ne pouvez '
+                             'pas vous supprimer des collaborateurs.')
         return super().perform_destroy(instance)
 
 

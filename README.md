@@ -1,12 +1,12 @@
-# Application LITReview
+# API Issue Tracking System de SOFTDESK
 
 ## DESCRIPTION
-L'application LITReview permet à différents utilisateurs de demander et d'échanger des critiques littéraires.
+L'API permet à des utilisateurs enregistrés de créer des projets pour enregister des problèmes auxquels des commentaires peuvent être ajoutés.
 
 ## INSTALLATION
 
-1. Cloner le dépôt du projet avec la commande '$ git clone clone https://github.com/Louack/OC_PP9.git' ou télécharger le fichier zip du projet à l'adresse 'https://github.com/Louack/OC_PP9/archive/refs/heads/master.zip'
-2. Placer le projet dans un dossier et se rendre dans ce dossier depuis le terminal de commande
+1. Cloner le dépôt du projet avec la commande '$ git clone clone https://github.com/Louack/OC_PP10.git' ou télécharger le fichier zip du projet à l'adresse 'https://github.com/Louack/OC_PP10/archive/refs/heads/master.zip'
+2. Se rendre dans le dossier du projet depuis le terminal de commande
 3. Créer un environnement virtuel dans ce dossier avec `$ py -m venv env` sous windows ou bien `$ python3 -m venv env` sous macos ou linux.
 4. Activer l'environnement virtuel avec la commande `$ env\Scripts\activate` sous windows ou bien `$ source env/bin/activate` sous macos ou linux.
 5. Installer les packages nécessaires au bon fonctionnement du projet avec la commande `$ pip install -r requirements.txt`.
@@ -16,22 +16,18 @@ L'application LITReview permet à différents utilisateurs de demander et d'éch
 
 ## UTILISATION ET FONCTIONNALITES
 
-L'application est accessible depuis l'adresse locale 'http://127.0.0.1:8000/'
-L'application propose les fonctionnalités suivantes :
-* Inscription d'un nouvel utilisateur et connexion d'un utilisateur existant à l'adresse 'http://127.0.0.1:8000/auth'. Un nom d'utilisateur suivi d'un mot de passe sont demandés
-* Une fois connecté, l'utilisateur est redirigé vers son flux. Le panneau de navigation situé en haut à droite permet d'accéder au différentes informations enregistrés conernant l'utilisateur
-* Consultation du flux d'informations via la rubrique 'Flux' du panneau de navigation. Le flux rassemble toutes les publications de l'utilisateur ainsi que celles de ses abonnements et les réponses des non-abonnés à ses publications
-* Création de demande de critique et création de critique directe sont disponibles grâce aux deux boutons situé en haut du flux. La demande de critique nécessite d'entrer un titre et optionnellement une description et une image. La création de critique nécessite l'entrée d'un titre et d'une note ainsi que d'un commentaire en option.
-* Sous chaque demande de critique, un bouton de création de réponse est disponible. Une seule réponse par utilisateur est acceptée.
-* Chaque publication peut être modifiée ou supprimée par son utilisateur via les boutons situés en bas à droite des publications.
-* Toutes les publications de l'utilisateur sont disponibles via la rubrique 'Mes Publications' du panneau de navigation.
-* La rubrique 'Mes Abonnements' du panneau de navigation permet de consulter abonnements et abonnés ainsi que suivre et se désabonner des utilisateurs du site via un menu déroulant.
-* Toutes les fonctionnalités citées précédemment peuvent être effectuées par superutilisateur via l'interface d'administration accessible à l'adresse 'http://127.0.0.1:8000/admin/'
+L'API est accessible depuis l'adresse locale 'http://127.0.0.1:8000/'
+La documentation Postman des fonctionnalités est disponible à l'adresse : 
+'https://web.postman.co/workspace/My-Workspace~397ac477-adca-4c79-8e68-74edce8cd8e6/documentation/17143964-b737e079-9ddf-4db5-9b6e-560f6d9ab27d'
 
 ## BASE DE DONNEES FOURNIE
 
-L'utilisateur 'Loïc' dispose des droits d'administration.
-Le mot de passe attribué à tous les utilisateurs est : 'projet_django'
+L'utilisateur 'loic@softdesk.com' dispose des droits d'administration.
+Le mot de passe attribué à tous les utilisateurs est : 'api_projet'.
+Liste des utilisateurs:
+* loic@softdesk.com
+* roger@softdesk.com
+* sylvie@softdesk.com
 
 ## GENERATION D'UN RAPPORT FLAKE8
 
