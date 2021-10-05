@@ -5,14 +5,14 @@ L'API permet à des utilisateurs enregistrés de créer des projets pour enregis
 
 ## INSTALLATION
 
-1. Cloner le dépôt du projet avec la commande '$ git clone clone https://github.com/Louack/OC_PP10.git' ou télécharger le fichier zip du projet à l'adresse 'https://github.com/Louack/OC_PP10/archive/refs/heads/master.zip'
+1. Cloner le dépôt du projet avec la commande '$ git clone https://github.com/Louack/OC_PP10.git' ou télécharger le fichier zip du projet à l'adresse 'https://github.com/Louack/OC_PP10/archive/refs/heads/master.zip'
 2. Se rendre dans le dossier du projet depuis le terminal de commande
 3. Créer un environnement virtuel dans ce dossier avec `$ py -m venv env` sous windows ou bien `$ python3 -m venv env` sous macos ou linux.
 4. Activer l'environnement virtuel avec la commande `$ env\Scripts\activate` sous windows ou bien `$ source env/bin/activate` sous macos ou linux.
 5. Installer les packages nécessaires au bon fonctionnement du projet avec la commande `$ pip install -r requirements.txt`.
 6. Se placer ensuite dans le dossier 'src' et créer et effectuer les migrations vers la base de données grâce à la commande '$ py manage.py makemigrations' suivie de la commande '$ py manage.py migrate'
-7. Créer un superutilisateur disposant des droits d'administration avec la commande '$ py manage.py createsuperuser'
-8. Enfin lancer le serveur avec la commande '$ py manage.py runserver'. 
+7. Créer un superutilisateur disposant des droits d'administration avec la commande `$ py manage.py createsuperuser`
+8. Enfin lancer le serveur avec la commande `$ py manage.py runserver`. 
 
 ## UTILISATION ET FONCTIONNALITES
 
